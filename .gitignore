@@ -1,0 +1,35 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+/out/
+/shelf/
+/workspace.xml
+/httpRequests/
+/queries/
+/dataSources/
+/dataSources.local.xml
+
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# Java compiled files
+*.class
+
+# Local H2 database
+data/
+*.mv.db
+*.trace.db
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Log files
+*.log

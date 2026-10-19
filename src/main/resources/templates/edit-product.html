@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Product | WarrantyTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav {
+            background: white;
+            padding: 16px 35px;
+        }
+
+        nav a {
+            margin-right: 22px;
+            text-decoration: none;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 700px;
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-weight: bold;
+        }
+
+        input, button, .cancel-button {
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            background: #1d4ed8;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .cancel-button {
+            display: inline-block;
+            margin-top: 16px;
+            background: #e2e8f0;
+            color: #1e293b;
+            text-decoration: none;
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 16px;
+            }
+
+            header, nav {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>WarrantyTrack</h1>
+    <p>Product Warranty &amp; Service Tracker</p>
+</header>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/products">Products</a>
+    <a href="/claims">Service Claims</a>
+</nav>
+
+<main>
+    <h2>Edit Product</h2>
+
+    <p class="error-message"
+       th:if="${error}"
+       th:text="${error}">
+    </p>
+
+    <section class="panel">
+        <form th:action="@{/products/edit/{id}(id=${product.id})}"
+              th:object="${product}" method="post">
+
+            <label>
+                Product Name
+                <input type="text" th:field="*{name}" required>
+            </label>
+
+            <label>
+                Brand
+                <input type="text" th:field="*{brand}" required>
+            </label>
+
+            <label>
+                Purchase Date
+                <input type="date" th:field="*{purchaseDate}"
+                       th:attr="max=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
+                       required>
+            </label>
+
+            <label>
+                Warranty (Months)
+                <input type="number" th:field="*{warrantyMonths}"
+                       min="1" max="120" required>
+            </label>
+
+            <button type="submit">Save Changes</button>
+        </form>
+
+        <a class="cancel-button" href="/products">Cancel</a>
+    </section>
+</main>
+
+</body>
+</html>

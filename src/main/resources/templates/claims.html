@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Claims | WarrantyTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav {
+            background: white;
+            padding: 16px 35px;
+        }
+
+        nav a {
+            margin-right: 22px;
+            text-decoration: none;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+        }
+
+        .claim-form {
+            display: grid;
+            gap: 16px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-weight: bold;
+        }
+
+        input, select, textarea, button {
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: #1d4ed8;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #1e40af;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 13px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #eff6ff;
+        }
+
+        .status {
+            font-weight: bold;
+            color: #b45309;
+        }
+
+        .status-form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 220px;
+        }
+
+        .status-form select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .status-form button {
+            white-space: nowrap;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 16px;
+            }
+
+            header {
+                padding: 22px 20px;
+            }
+
+            nav {
+                padding: 16px 20px;
+            }
+
+            nav a {
+                margin-right: 12px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>WarrantyTrack</h1>
+    <p>Product Warranty &amp; Service Tracker</p>
+</header>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/products">Products</a>
+    <a href="/claims">Service Claims</a>
+</nav>
+
+<main>
+    <h2>Service Claim Management</h2>
+
+    <section class="panel">
+        <h3>Register a Service Claim</h3>
+
+        <form class="claim-form" th:action="@{/claims}" method="post">
+
+            <label>
+                Select Product
+                <select name="productId" required>
+                    <option value="">Choose a product</option>
+                    <option th:each="item : ${products}"
+                            th:value="${item.id}"
+                            th:text="${item.name + ' - ' + item.brand}">
+                    </option>
+                </select>
+            </label>
+
+            <label>
+                Problem Description
+                <textarea name="issueDescription"
+                          placeholder="Describe the product problem..."
+                          maxlength="2000"
+                          required></textarea>
+            </label>
+
+            <button type="submit">Submit Claim</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h3>Registered Service Claims</h3>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Product</th>
+                    <th>Problem</th>
+                    <th>Claim Date</th>
+                    <th>Status</th>
+                    <th>Update Status</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="claim : ${claims}">
+                    <td th:text="${claim.id}"></td>
+                    <td th:text="${claim.product.name}"></td>
+                    <td th:text="${claim.issueDescription}"></td>
+                    <td th:text="${claim.claimDate}"></td>
+                    <td class="status" th:text="${claim.status}"></td>
+
+                    <td>
+                        <form class="status-form"
+                              th:action="@{/claims/update-status/{id}(id=${claim.id})}"
+                              method="post">
+
+                            <select name="status" required>
+                                <option value="Pending"
+                                        th:selected="${claim.status == 'Pending'}">
+                                    Pending
+                                </option>
+
+                                <option value="In Progress"
+                                        th:selected="${claim.status == 'In Progress'}">
+                                    In Progress
+                                </option>
+
+                                <option value="Approved"
+                                        th:selected="${claim.status == 'Approved'}">
+                                    Approved
+                                </option>
+
+                                <option value="Rejected"
+                                        th:selected="${claim.status == 'Rejected'}">
+                                    Rejected
+                                </option>
+                            </select>
+
+                            <button type="submit">Update</button>
+                        </form>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(claims)}">
+                    <td colspan="6">No service claims registered yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - WarrantyTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .register-box {
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #243b53;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #627d98;
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin: 14px 0 6px;
+            color: #334e68;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #bcccdc;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 22px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .error {
+            color: #b91c1c;
+            background: #fee2e2;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .login-link a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        #companyField {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+<div class="register-box">
+    <h1>WarrantyTrack</h1>
+    <p class="subtitle">Create your account</p>
+
+    <p class="error" th:if="${error}" th:text="${error}"></p>
+
+    <form action="/register" method="post">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <label for="fullName">Full Name</label>
+        <input type="text" id="fullName" name="fullName"
+               required maxlength="100">
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email"
+               required maxlength="254">
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               required minlength="8" maxlength="72">
+
+        <label for="accountType">Account Type</label>
+        <select id="accountType" name="accountType" required>
+            <option value="PERSONAL">Personal Account</option>
+            <option value="COMPANY">Company Account</option>
+        </select>
+
+        <div id="companyField">
+            <label for="companyName">Company Name</label>
+            <input type="text" id="companyName" name="companyName"
+                   maxlength="150">
+        </div>
+
+        <button type="submit">Create Account</button>
+    </form>
+
+    <p class="login-link">
+        Already have an account? <a href="/login">Login</a>
+    </p>
+</div>
+
+<script>
+    const accountType = document.getElementById("accountType");
+    const companyField = document.getElementById("companyField");
+    const companyName = document.getElementById("companyName");
+
+    function updateCompanyField() {
+        const isCompany = accountType.value === "COMPANY";
+
+        companyField.style.display = isCompany ? "block" : "none";
+        companyName.required = isCompany;
+    }
+
+    accountType.addEventListener("change", updateCompanyField);
+    updateCompanyField();
+</script>
+</body>
+</html>

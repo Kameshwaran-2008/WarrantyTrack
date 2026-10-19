@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | WarrantyTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav {
+            background: white;
+            padding: 16px 35px;
+        }
+
+        nav a {
+            margin-right: 22px;
+            text-decoration: none;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            font-weight: bold;
+        }
+
+        input, button, .edit-button, select {
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button, .edit-button {
+            background: #1d4ed8;
+            color: white;
+            cursor: pointer;
+            border: none;
+            align-self: end;
+        }
+
+        .edit-button {
+            display: inline-block;
+            text-decoration: none;
+            margin: 2px 6px 2px 0;
+        }
+
+        button:hover, .edit-button:hover {
+            background: #1e40af;
+        }
+
+        .delete-button {
+            background: #dc2626;
+        }
+
+        .delete-button:hover {
+            background: #b91c1c;
+        }
+
+        .delete-form {
+            display: inline-block;
+            margin: 0;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 13px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        th {
+            background: #eff6ff;
+        }
+
+        .search-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .search-controls input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-controls select {
+            min-width: 190px;
+            background: white;
+        }
+
+        .status-active {
+            color: #15803d;
+            font-weight: bold;
+        }
+
+        .status-expiring {
+            color: #b45309;
+            font-weight: bold;
+        }
+
+        .status-expired {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 16px;
+            }
+
+            header, nav {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .search-controls {
+                flex-direction: column;
+            }
+
+            .search-controls input,
+            .search-controls select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>WarrantyTrack</h1>
+    <p>Product Warranty &amp; Service Tracker</p>
+</header>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/products">Products</a>
+    <a href="/claims">Service Claims</a>
+</nav>
+
+<main>
+    <h2>Product Management</h2>
+
+    <p th:if="${error}"
+       th:text="${error}"
+       style="color: #dc2626; font-weight: bold;">
+    </p>
+
+    <section class="panel">
+        <h3>Register a Product</h3>
+
+        <form th:action="@{/products}"
+              th:object="${product}"
+              method="post">
+
+            <label>
+                Product Name
+                <input type="text" th:field="*{name}" required>
+            </label>
+
+            <label>
+                Brand
+                <input type="text" th:field="*{brand}" required>
+            </label>
+
+            <label>
+                Purchase Date
+                <input type="date"
+                       th:field="*{purchaseDate}"
+                       th:attr="max=${#temporals.format(#temporals.createToday(), 'yyyy-MM-dd')}"
+                       required>
+            </label>
+
+            <label>
+                Warranty (Months)
+                <input type="number"
+                       th:field="*{warrantyMonths}"
+                       min="1"
+                       max="120"
+                       required>
+            </label>
+
+            <button type="submit">Register Product</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h3>Registered Products</h3>
+
+        <div class="search-controls">
+            <input type="text"
+                   id="productSearch"
+                   placeholder="Search by product or brand..."
+                   aria-label="Search products">
+
+            <select id="warrantyFilter"
+                    aria-label="Filter by warranty status">
+                <option value="all">All Warranty Statuses</option>
+                <option value="active">Active</option>
+                <option value="expiring soon">Expiring Soon</option>
+                <option value="expired">Expired</option>
+                <option value="unknown">Unknown</option>
+            </select>
+        </div>
+
+        <p id="noSearchResults" hidden>
+            No products match your search or selected filter.
+        </p>
+
+        <div class="table-wrap">
+            <table id="productsTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Purchase Date</th>
+                    <th>Warranty End Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="item : ${products}" class="product-row">
+                    <td th:text="${item.id}"></td>
+                    <td class="product-name" th:text="${item.name}"></td>
+                    <td class="product-brand" th:text="${item.brand}"></td>
+                    <td th:text="${item.purchaseDate}"></td>
+                    <td th:text="${item.warrantyEndDate}"></td>
+
+                    <td class="product-status"
+                        th:text="${item.warrantyStatus}"
+                        th:attr="data-status=${#strings.toLowerCase(item.warrantyStatus)}"
+                        th:classappend="${item.warrantyStatus == 'Active'} ? ' status-active' : (${item.warrantyStatus == 'Expiring Soon'} ? ' status-expiring' : (${item.warrantyStatus == 'Expired'} ? ' status-expired' : ''))">
+                    </td>
+
+                    <td>
+                        <a class="edit-button"
+                           th:href="@{/products/view/{id}(id=${item.id})}">
+                            View Details
+                        </a>
+
+                        <a class="edit-button"
+                           th:href="@{/products/edit/{id}(id=${item.id})}">
+                            Edit
+                        </a>
+
+                        <form class="delete-form"
+                              th:action="@{/products/delete/{id}(id=${item.id})}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this product?');">
+
+                            <button type="submit" class="delete-button">
+                                Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+
+                <tr id="emptyProductsRow"
+                    th:if="${#lists.isEmpty(products)}">
+                    <td colspan="7">No products registered yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+    const productSearch = document.getElementById("productSearch");
+    const warrantyFilter = document.getElementById("warrantyFilter");
+    const productRows = document.querySelectorAll(".product-row");
+    const noSearchResults = document.getElementById("noSearchResults");
+    const emptyProductsRow = document.getElementById("emptyProductsRow");
+
+    function filterProducts() {
+        const searchText = productSearch.value.trim().toLowerCase();
+        const selectedStatus = warrantyFilter.value;
+        let visibleCount = 0;
+
+        productRows.forEach(row => {
+            const name = row.querySelector(".product-name")
+                .textContent.toLowerCase();
+
+            const brand = row.querySelector(".product-brand")
+                .textContent.toLowerCase();
+
+            const status = row.querySelector(".product-status")
+                .dataset.status;
+
+            const matchesSearch =
+                name.includes(searchText) || brand.includes(searchText);
+
+            const matchesStatus =
+                selectedStatus === "all" || status === selectedStatus;
+
+            const visible = matchesSearch && matchesStatus;
+
+            row.hidden = !visible;
+
+            if (visible) {
+                visibleCount++;
+            }
+        });
+
+        noSearchResults.hidden =
+            productRows.length === 0 || visibleCount > 0;
+
+        if (emptyProductsRow) {
+            emptyProductsRow.hidden = productRows.length > 0;
+        }
+    }
+
+    productSearch.addEventListener("input", filterProducts);
+    warrantyFilter.addEventListener("change", filterProducts);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | WarrantyTrack</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 22px 35px;
+        }
+
+        header h1 {
+            margin: 0;
+        }
+
+        nav {
+            background: white;
+            padding: 16px 35px;
+        }
+
+        nav a {
+            margin-right: 22px;
+            text-decoration: none;
+            color: #1d4ed8;
+            font-weight: bold;
+        }
+
+        main {
+            padding: 30px;
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .panel {
+            background: white;
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+            margin-top: 25px;
+        }
+
+        .detail {
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            font-size: 17px;
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .status-active {
+            color: #15803d;
+        }
+
+        .status-expiring {
+            color: #b45309;
+        }
+
+        .status-expired {
+            color: #dc2626;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 11px 18px;
+            border-radius: 6px;
+            background: #1d4ed8;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-right: 8px;
+        }
+
+        .button:hover {
+            background: #1e40af;
+        }
+
+        .secondary {
+            background: #475569;
+        }
+
+        .secondary:hover {
+            background: #334155;
+        }
+
+        @media (max-width: 600px) {
+            header, nav {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            main {
+                padding: 16px;
+            }
+
+            .panel {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>WarrantyTrack</h1>
+    <p>Product Warranty &amp; Service Tracker</p>
+</header>
+
+<nav>
+    <a href="/">Dashboard</a>
+    <a href="/products">Products</a>
+    <a href="/claims">Service Claims</a>
+</nav>
+
+<main>
+    <section class="panel">
+        <h2>Product Details</h2>
+
+        <p>View your product information and warranty status below.</p>
+
+        <div class="details-grid">
+            <div class="detail">
+                <div class="detail-label">Product ID</div>
+                <div class="detail-value" th:text="${product.id}"></div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Product Name</div>
+                <div class="detail-value" th:text="${product.name}"></div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Brand</div>
+                <div class="detail-value" th:text="${product.brand}"></div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Purchase Date</div>
+                <div class="detail-value" th:text="${product.purchaseDate}"></div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Warranty Duration</div>
+                <div class="detail-value">
+                    <span th:text="${product.warrantyMonths}"></span> months
+                </div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Warranty End Date</div>
+                <div class="detail-value"
+                     th:text="${product.warrantyEndDate}">
+                </div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Warranty Status</div>
+                <div class="detail-value"
+                     th:text="${product.warrantyStatus}"
+                     th:classappend="${product.warrantyStatus == 'Active'} ? ' status-active' : (${product.warrantyStatus == 'Expiring Soon'} ? ' status-expiring' : (${product.warrantyStatus == 'Expired'} ? ' status-expired' : ''))">
+                </div>
+            </div>
+
+            <div class="detail">
+                <div class="detail-label">Days Until Warranty End</div>
+                <div class="detail-value"
+                     th:if="${product.warrantyEndDate != null}"
+                     th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), product.warrantyEndDate)}">
+                </div>
+
+                <div class="detail-value"
+                     th:unless="${product.warrantyEndDate != null}">
+                    Unknown
+                </div>
+            </div>
+        </div>
+
+        <a class="button"
+           th:href="@{/products/edit/{id}(id=${product.id})}">
+            Edit Product
+        </a>
+
+        <a class="button secondary" href="/products">
+            Back to Products
+        </a>
+    </section>
+</main>
+
+</body>
+</html>
